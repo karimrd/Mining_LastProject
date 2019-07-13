@@ -1,0 +1,45 @@
+*&---------------------------------------------------------------------*
+*& Report  ZTEST_KRD_03
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZTEST_KRD_03.
+
+     DATA: L_REQUESTS TYPE TABLE OF RSREQDELSTRUC,
+           WA_REQ TYPE RSREQDELSTRUC,
+           L_REQUEST TYPE RSREQDELSTRUC-RNR,
+           TS_REQ    TYPE RSREQDELSTRUC-TIMESTAMP.
+     data: TS_DESDE type AD_TSTAMP, "AAAAMMDDhhmmss
+           TS_HASTA type AD_TSTAMP. "AAAAMMDDhhmmss
+
+CALL FUNCTION 'ADDR_CONVERT_DATE_TO_TIMESTAMP'
+  EXPORTING
+    IV_DATE       = sy-datum
+    IV_HIGH       = ' '
+  IMPORTING
+    EV_TIMESTAMP  = ts_desde.
+
+CALL FUNCTION 'ADDR_CONVERT_DATE_TO_TIMESTAMP'
+  EXPORTING
+    IV_DATE       = sy-datum
+    IV_HIGH       = 'X'
+  IMPORTING
+    EV_TIMESTAMP  = ts_hasta.
+
+SELECT * FROM RSMONICDP
+INTO CORRESPONDING FIELDS OF TABLE L_REQUESTS
+WHERE ICUBE = 'ZSTK_C03'
+AND   DP_NR EQ '999999'
+and   timestamp < ts_hasta
+and   timestamp > ts_desde
+ORDER BY TIMESTAMP DESCENDING.
+
+IF SY-SUBRC EQ 0.
+  READ TABLE L_REQUESTS INDEX 2 INTO  WA_REQ.
+  IF SY-SUBRC EQ 0.
+    DELETE L_REQUESTS WHERE RNR = WA_REQ-RNR.
+  READ TABLE L_REQUESTS INDEX 1 INTO  WA_REQ.
+  ENDIF.
+ENDIF.
