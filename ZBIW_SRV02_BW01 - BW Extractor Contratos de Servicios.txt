@@ -1,0 +1,892 @@
+"
+
+REPORT ZBIW_SRV02_BW01.
+
+INCLUDE: ZBIW_SRV02_BW01_TOP,
+         ZBIW_SRV02_BW01_SEL,
+         ZBIW_SRV02_BW01_MAI,
+         ZBIW_SRV02_BW01_F01.
+
+*------------------------------------------------------------------------------------*
+
+*&---------------------------------------------------------------------*
+*&  Include           ZBIW_SRV02_BW01_TOP
+*&---------------------------------------------------------------------*
+
+TABLES: T001, EKKO, EKPO, EKBE, ESSR, ESLL, ZBVTB_SRV02_BW01.
+
+TYPES: BEGIN OF TY_EKPO,
+         EBELN TYPE EKPO-EBELN,
+         EBELP TYPE EKPO-EBELP,
+         LOEKZ TYPE EKPO-LOEKZ,
+         UMDAT TYPE EKPO-AEDAT,
+         TXZ01 TYPE EKPO-TXZ01, "Texto de la posición del pedido
+         BUKRS TYPE EKPO-BUKRS,
+         WERKS TYPE EKPO-WERKS,
+         BEDNR TYPE EKPO-BEDNR, "Nro de Necesidad
+         MATKL TYPE EKPO-MATKL,
+         KTMNG TYPE EKPO-KTMNG, "(menge_po)
+*         MENGE_PO TYPE EKPO-MENGE, "Cant contratada Ord.d.Compra/Servicio
+         MEINS_PO TYPE EKPO-MEINS, " Unidad de medida
+         BPRME TYPE EKPO-BPRME,
+         NETPR TYPE EKPO-NETPR,
+         PEINH TYPE EKPO-PEINH,
+         NETWR TYPE EKPO-NETWR,
+         ELIKZ TYPE EKPO-ELIKZ,
+         PSTYP TYPE EKPO-PSTYP,
+         KNTTP TYPE EKPO-KNTTP,
+         KONNR TYPE EKPO-KONNR,
+         KTPNR TYPE EKPO-KTPNR,
+         PACKNO TYPE EKPO-PACKNO,
+         AFNAM TYPE EKPO-AFNAM,
+         AUDAT TYPE EKPO-AUDAT,
+      END OF TY_EKPO.
+
+TYPES: BEGIN OF TY_EKKO,
+         EBELN TYPE EKKO-EBELN,
+         BUKRS TYPE EKKO-BUKRS,
+         BSART TYPE EKKO-BSART,
+         LOEKZ TYPE EKKO-LOEKZ, "Ind.d.borrado en el doc.d. compras
+         AEDAT TYPE EKKO-AEDAT, "Fecha de creación del registro
+         LIFNR TYPE EKKO-LIFNR,
+         EKORG TYPE EKKO-EKORG,
+         EKGRP TYPE EKKO-EKGRP,
+         WAERS TYPE EKKO-WAERS, "Moneda pedido
+         WKURS TYPE EKKO-WKURS, "Tipo de cambio
+         BEDAT TYPE EKKO-BEDAT, "Fecha del documento de compras
+         KDATB TYPE EKKO-KDATB, "In.período validez
+         KDATE TYPE EKKO-KDATE, "Fin período validez
+         KONNR TYPE EKKO-KONNR, "Nro del contrato.superior
+         KTWRT TYPE EKKO-KTWRT, "Valor previsto
+         UNSEZ TYPE EKKO-UNSEZ, "Nuestra referencia
+         ERNAM TYPE EKKO-ERNAM, "Creado por
+         NAME_FIRST TYPE AD_NAMEFIR,
+         NAME_LAST  TYPE AD_NAMELAS,
+        END OF TY_EKKO.
+
+
+TYPES: BEGIN OF TY_ESLL,
+       PACKNO  TYPE ESLL-PACKNO,
+       SUB_PACKNO TYPE ESLL-SUB_PACKNO,
+       INTROW  TYPE ESLL-INTROW,
+       EXTROW  TYPE ESLL-EXTROW,
+       SRVPOS  TYPE ESLL-SRVPOS,
+       KTEXT1  TYPE ESLL-KTEXT1,
+       TXT_AMPL TYPE ETEXT250,
+       MENGE_LL   TYPE ESLL-MENGE,
+       MEINS_LL   TYPE ESLL-MEINS,
+       TBTWR      TYPE ESLL-TBTWR,
+       WAERS_LL   TYPE ESLH-WAERS,
+       END OF TY_ESLL.
+
+TYPES: BEGIN OF TY_DOCS,
+         EBELN TYPE EKKO-EBELN,
+*         EBELP TYPE EKPO-EBELP,
+         BSART TYPE EKKO-BSART,
+      END OF TY_DOCS.
+
+*TYPES: BEGIN OF TY_DATOS,
+** Contrato datos cabecera
+*         EBELN TYPE EKKO-EBELN, "Nro documento de compra
+*         EBELP TYPE EKPO-EBELP, "Posición de doc de compra
+*         BUKRS TYPE EKKO-BUKRS,
+*         BSART TYPE EKKO-BSART,
+*         LOEKZ TYPE EKKO-LOEKZ,
+*         AEDAT TYPE EKKO-AEDAT,
+*         LIFNR TYPE EKKO-LIFNR,
+*         EKORG TYPE EKKO-EKORG,
+*         EKGRP TYPE EKKO-EKGRP,
+*         WAERS TYPE EKKO-WAERS,
+*         WKURS TYPE EKKO-WKURS,
+*         BEDAT TYPE EKKO-BEDAT,
+*         KDATB TYPE EKKO-KDATB,
+*         KDATE TYPE EKKO-KDATE,
+**         KONNR TYPE EKKO-KONNR,
+*         KTWRT TYPE EKKO-KTWRT,
+*         KTWRT_ML TYPE EKKO-KTWRT, "Monto previsto en Mon.Local
+*         UNSEZ TYPE EKKO-UNSEZ,
+*         ERNAM TYPE EKKO-ERNAM,
+*         NAME_FIRST TYPE AD_NAMEFIR,
+*         NAME_LAST  TYPE AD_NAMELAS,
+
+** Contrato - Datos de posicion
+*        LOEKZ_P TYPE EKPO-LOEKZ,
+*        UMDAT TYPE EKPO-AEDAT,
+*        TXZ01 TYPE EKPO-TXZ01, "Texto de la posición del pedido
+**        BUKRS TYPE EKPO-BUKRS,
+*        WERKS TYPE EKPO-WERKS,
+*        BEDNR TYPE EKPO-BEDNR,
+*        MATKL TYPE EKPO-MATKL,
+*        KTMNG TYPE EKPO-KTMNG,
+*        MENGE_PO TYPE EKPO-MENGE,
+*        MEINS_PO TYPE EKPO-MEINS,
+*        BPRME TYPE EKPO-BPRME,
+*        NETPR TYPE EKPO-NETPR,
+*        PEINH TYPE EKPO-PEINH,
+*        NETWR TYPE EKPO-NETWR,
+*        ELIKZ TYPE EKPO-ELIKZ,
+*        PSTYP TYPE EKPO-PSTYP,
+*        KNTTP TYPE EKPO-KNTTP,
+*        KONNR TYPE EKPO-KONNR,
+*        KTPNR TYPE EKPO-KTPNR,
+*        PACKNO TYPE EKPO-PACKNO,
+*        AFNAM TYPE EKPO-AFNAM,
+*        AUDAT TYPE EKPO-AUDAT,
+** Servicios (Partidas)
+**        PACKNO  TYPE ESLL-PACKNO,
+*        SUB_PACKNO TYPE ESLL-SUB_PACKNO,
+*        INTROW  TYPE ESLL-INTROW,
+*        EXTROW  TYPE ESLL-EXTROW,
+*        SRVPOS  TYPE ESLL-SRVPOS,
+*        KTEXT1  TYPE ESLL-KTEXT1,
+*        TXT_AMPL TYPE ETEXT250,
+*        MENGE_LL   TYPE ESLL-MENGE,
+*        MEINS_LL   TYPE ESLL-MEINS,
+*        TBTWR   TYPE ESLL-TBTWR,
+*        WAERS_LL   TYPE ESLH-WAERS.
+*******
+*TYPES: END OF TY_DATOS.
+
+TYPES: TAB_DOCS TYPE STANDARD TABLE OF TY_DOCS.
+TYPES: TAB_EKKO TYPE STANDARD TABLE OF TY_EKKO.
+TYPES: TAB_EKPO TYPE STANDARD TABLE OF TY_EKPO.
+TYPES: TAB_ESSR TYPE STANDARD TABLE OF TY_ESSR.
+TYPES: TAB_ESLL TYPE STANDARD TABLE OF TY_ESLL.
+*TYPES: TAB_DATOS TYPE STANDARD TABLE OF TY_DATOS.
+TYPES: TAB_DATOS TYPE STANDARD TABLE OF ZBVTB_SRV02_BW01.
+
+DATA: GT_DOCS TYPE TAB_DOCS WITH HEADER LINE.
+DATA: GT_DOCS_AUX  TYPE TAB_DOCS.
+DATA: GT_DOCS_EKKO TYPE TAB_DOCS.
+DATA: GT_DOCS_EKPO TYPE TAB_DOCS.
+DATA: GT_DOCS_ESSR TYPE TAB_DOCS.
+DATA: GT_DOCS_ESLL TYPE TAB_DOCS.
+DATA: GT_EKKO TYPE TAB_EKKO.
+DATA: GT_EKPO TYPE TAB_EKPO.
+DATA: GT_ESSR TYPE TAB_ESSR.
+DATA: GT_ESLL TYPE TAB_ESLL.
+*TYPES: tab_datos TYPE STANDARD TABLE OF ty_ekpo.
+DATA: GT_DATOS  TYPE TAB_DATOS.
+DATA: GT_DATOS2 TYPE TAB_DATOS.
+DATA: L_SUB_PACKNO LIKE ESLL-SUB_PACKNO.
+DATA: L_TDNAME TYPE THEAD-TDNAME,
+      LT_LINES TYPE TABLE OF TLINE.
+DATA: L_NAME_FIRST TYPE AD_NAMEFIR,
+      L_NAME_LAST TYPE  AD_NAMELAS.
+
+FIELD-SYMBOLS: <FS_DATOS> LIKE LINE OF GT_DATOS,
+               <FS_DOCS> LIKE LINE OF GT_DOCS,
+               <FS_EKKO> LIKE LINE OF GT_EKKO,
+               <FS_EKPO> LIKE LINE OF GT_EKPO,
+               <FS_ESLL> LIKE LINE OF GT_ESLL.
+FIELD-SYMBOLS: <FS_LINES> TYPE TLINE.
+
+
+RANGES: S_BSART FOR EKKO-BSART.
+
+*------------------------------------------------------------------------------------*
+
+*&---------------------------------------------------------------------*
+*&  Include           ZBIW_SRV02_BW01_SEL
+*&---------------------------------------------------------------------*
+
+SELECTION-SCREEN: BEGIN OF BLOCK B01 WITH FRAME TITLE text-B01.
+SELECT-OPTIONS:   S_EBELN FOR EKPO-EBELN. "Nro de documento
+SELECT-OPTIONS:   S_DATUM FOR EKKO-AEDAT. "Fecha de consulta
+PARAMETERS: p_bw AS CHECKBOX DEFAULT ''.
+SELECTION-SCREEN: END OF BLOCK B01.
+
+*------------------------------------------------------------------------------------*
+
+*&---------------------------------------------------------------------*
+*&  Include           ZBIW_SRV02_BW01_MAI
+*&---------------------------------------------------------------------*
+
+  PERFORM initialize_params.
+  PERFORM get_docs.
+  PERFORM get_data.
+  PERFORM dis_repo.
+
+*------------------------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&  Include           ZBIW_SRV02_BW01_F01
+*&---------------------------------------------------------------------*
+
+FORM INITIALIZE_PARAMS.
+
+* Clase de contrato de servicios:
+* ZPAI, ZAPM, ZAPP
+  REFRESH: S_BSART.
+  CLEAR: S_BSART.
+
+  CLEAR: S_BSART-HIGH.
+  S_BSART-SIGN = 'I'.
+  S_BSART-OPTION = 'EQ'.
+
+  S_BSART-LOW = 'ZPAI'.
+  APPEND S_BSART.
+
+  S_BSART-LOW = 'ZAPM'.
+  APPEND S_BSART.
+
+  S_BSART-LOW = 'ZAPP'.
+  APPEND S_BSART.
+
+
+ENDFORM.
+
+FORM GET_DOCS.
+
+* Juntar todos los documentos encontrados de:
+* GT_DOCS_ESSR
+* GT_DOCS_EKPO
+* GT_DOCS_EKKO
+* en >> GT_DOCS
+
+  REFRESH: GT_DOCS_AUX.
+* Se obtienen nro de documento ebeln
+* para HES creadas y modificadas en rango de fecha filtro.
+* Tabla ESSR Fecha de creacion ERDAT
+  REFRESH: GT_DOCS_ESSR.
+
+  SELECT EBELN
+  FROM ESSR
+  INTO TABLE GT_DOCS_ESSR
+  WHERE EBELN IN S_EBELN
+    AND ERDAT IN S_DATUM.
+
+  APPEND LINES OF GT_DOCS_ESSR TO GT_DOCS_AUX.
+  SORT GT_DOCS_AUX BY EBELN.
+  DELETE ADJACENT DUPLICATES FROM GT_DOCS_AUX COMPARING EBELN.
+
+* Tabla ESSR Fecha de modificacion AEDAT
+  REFRESH: GT_DOCS_ESSR.
+
+  SELECT EBELN
+  FROM ESSR
+  INTO TABLE GT_DOCS_ESSR
+  WHERE EBELN IN S_EBELN
+    AND AEDAT IN S_DATUM.
+
+  APPEND LINES OF GT_DOCS_ESSR TO GT_DOCS_AUX.
+  SORT GT_DOCS_AUX BY EBELN.
+  DELETE ADJACENT DUPLICATES FROM GT_DOCS_AUX COMPARING EBELN.
+
+* Se obtienen los docs posicion de servicios modificados en rango de fecha filtro.
+* Tabla EKPO fecha de modificación AEDAT
+  REFRESH: GT_DOCS_EKPO.
+*  SELECT EBELN EBELP
+  SELECT EBELN
+  FROM EKPO
+  INTO TABLE GT_DOCS_EKPO
+  WHERE EBELN IN S_EBELN
+  AND   AEDAT IN S_DATUM.
+
+  APPEND LINES OF GT_DOCS_EKPO TO GT_DOCS_AUX.
+  SORT GT_DOCS_AUX BY EBELN.
+  DELETE ADJACENT DUPLICATES FROM GT_DOCS_AUX COMPARING EBELN.
+
+* Se obtienen los nros de docs de servicios creados en rango de fecha filtro.
+* Tabla EKKO fecha de creación AEDAT
+  REFRESH: GT_DOCS_EKKO.
+
+  SELECT EBELN
+  FROM EKKO
+  INTO TABLE GT_DOCS_EKKO
+  WHERE BSART IN S_BSART
+  AND   BSTYP EQ 'K'
+  AND   AEDAT IN S_DATUM
+  AND   EBELN IN S_EBELN.
+
+  APPEND LINES OF GT_DOCS_EKKO TO GT_DOCS_AUX.
+  SORT GT_DOCS_AUX BY EBELN.
+  DELETE ADJACENT DUPLICATES FROM GT_DOCS_AUX COMPARING EBELN.
+
+  READ TABLE GT_DOCS_AUX INDEX 1 TRANSPORTING NO FIELDS.
+  IF SY-SUBRC EQ 0.
+
+  REFRESH: GT_DOCS.
+
+* Eliminar todos los documentos que no tienen clase documento servicios
+  SELECT EBELN, BSART
+  FROM EKKO
+  INTO TABLE @GT_DOCS
+  FOR ALL ENTRIES IN @GT_DOCS_AUX
+  WHERE EBELN = @GT_DOCS_AUX-EBELN
+  AND   BSART IN @S_BSART.
+
+  ENDIF.
+
+ENDFORM.
+
+FORM GET_DATA .
+
+  READ TABLE GT_DOCS INDEX 1 TRANSPORTING NO FIELDS.
+
+  IF SY-SUBRC EQ 0.
+
+*   Se obtienen las cabeceras de contratos
+    SELECT EBELN, BUKRS, BSART, LOEKZ, AEDAT, LIFNR, EKORG, EKGRP, WAERS, WKURS,
+           BEDAT, KDATB, KDATE, KONNR, KTWRT, UNSEZ, ERNAM
+    FROM EKKO
+    FOR ALL ENTRIES IN @GT_DOCS
+    WHERE EBELN = @GT_DOCS-EBELN
+    INTO CORRESPONDING FIELDS OF TABLE @GT_EKKO.
+
+*   Se obtienen las posiciones de contratos
+    SELECT EBELN EBELP LOEKZ AS LOEKZ_P AEDAT AS UMDAT TXZ01 BUKRS WERKS BEDNR MATKL KTMNG
+           MENGE AS MENGE_CON MEINS AS MEINS_CON BPRME NETPR PEINH NETWR ELIKZ PSTYP KNTTP KONNR KTPNR PACKNO AFNAM AUDAT
+    FROM EKPO
+    INTO CORRESPONDING FIELDS OF TABLE GT_DATOS2
+    FOR ALL ENTRIES IN GT_DOCS
+    WHERE EBELN = GT_DOCS-EBELN
+    AND   PSTYP EQ 9.
+
+* Combinar Cabeceras EKKO y Posiciones pedido EKPO para Contratos
+  LOOP AT GT_DATOS2 ASSIGNING <FS_DATOS>.
+
+* Agregar datos de cabecera
+    READ TABLE GT_EKKO ASSIGNING <FS_EKKO>
+                        WITH KEY EBELN = <FS_DATOS>-EBELN.
+    IF SY-SUBRC EQ 0.
+       MOVE-CORRESPONDING  <FS_EKKO> TO <FS_DATOS>.
+       " Validar el tipo de cambio
+       IF <FS_EKKO>-WAERS EQ 'USD'.
+          <FS_DATOS>-WAERS_CON = <FS_EKKO>-WAERS.
+          <FS_DATOS>-WKURS_CON = <FS_EKKO>-WKURS.
+       ELSE.
+          <FS_DATOS>-WAERS_CON = <FS_EKKO>-WAERS.
+          <FS_DATOS>-WKURS_CON = ABS( <FS_EKKO>-WKURS ).
+       ENDIF.
+       "Convertir valores a USD (Moneda Local)
+       "Monto previsto  KTWRT de MD a KTWRT en ML
+       <FS_DATOS>-KTWRT_ML = <FS_DATOS>-KTWRT / <FS_DATOS>-WKURS_CON.
+        CLEAR: <FS_DATOS>-NAME_FIRST, <FS_DATOS>-NAME_LAST.
+       " Obtener Nombres y apellidos del usuario
+        SELECT SINGLE NAME_FIRST NAME_LAST
+        FROM V_USR_NAME
+        INTO ( <FS_DATOS>-NAME_FIRST, <FS_DATOS>-NAME_LAST )
+        WHERE BNAME = <FS_EKKO>-ERNAM.
+*       CONCATENATE L_NAME_FIRST L_NAME_LAST INTO <FS_DATOS>-NAME_TEXT.
+    ENDIF.
+
+    MODIFY GT_DATOS2 FROM <FS_DATOS>.
+*    APPEND <FS_DATOS> TO GT_DATOS.
+
+  ENDLOOP.
+
+  SORT GT_DATOS2 BY EBELN EBELP.
+
+* Para cada contrato obtener los servicios
+  LOOP AT GT_DATOS2 ASSIGNING <FS_DATOS>.
+
+* Marca
+* Obtener el sub_packno
+     SELECT A~PACKNO AS PACKNO, B~PACKNO AS SUB_PACKNO, B~INTROW, B~EXTROW, B~SRVPOS, B~KTEXT1,
+            B~MENGE AS MENGE_LL, B~MEINS AS MEINS_LL, B~TBTWR
+     FROM ESLL AS A JOIN ESLL AS B ON A~SUB_PACKNO = B~PACKNO
+     WHERE  A~PACKNO = @<FS_DATOS>-PACKNO
+     INTO CORRESPONDING FIELDS OF TABLE @GT_ESLL.
+
+    SORT GT_ESLL.
+
+    IF SY-SUBRC EQ 0.
+
+        LOOP AT GT_ESLL ASSIGNING <FS_ESLL>.
+            " Obtener texto ampliado del servicio
+            CLEAR: L_TDNAME.
+            CONCATENATE <FS_ESLL>-SUB_PACKNO <FS_ESLL>-INTROW INTO L_TDNAME.
+            CALL FUNCTION 'READ_TEXT'
+                EXPORTING
+                  ID                      = 'LTXT'
+*                  LANGUAGE                = sy-langu
+                  LANGUAGE                = 'S'
+                  NAME                    = L_TDNAME
+                  OBJECT                  = 'ESLL'
+                TABLES
+                  LINES                   = LT_LINES
+                EXCEPTIONS
+                  ID                      = 1
+                  LANGUAGE                = 2
+                  NAME                    = 3
+                  NOT_FOUND               = 4
+                  OBJECT                  = 5
+                  REFERENCE_CHECK         = 6
+                  WRONG_ACCESS_TO_ARCHIVE = 7
+                  OTHERS                  = 8.
+
+            CASE SY-SUBRC.
+              WHEN 0.
+                  CLEAR <FS_ESLL>-TXT_AMPL.
+                  LOOP AT LT_LINES ASSIGNING <FS_LINES>.
+                    CONCATENATE <FS_LINES>-TDLINE <FS_ESLL>-TXT_AMPL
+                                INTO <FS_ESLL>-TXT_AMPL.
+                  ENDLOOP.
+
+               WHEN OTHERS.
+                  <FS_ESLL>-TXT_AMPL = 'Error de lectura'.
+*              WHEN 1. <FS_ESLL>-TXT_AMPL = 'Error en ID'.
+*              WHEN 2. <FS_ESLL>-TXT_AMPL = 'Error en language'.
+            ENDCASE.
+
+           "Obtener la moneda del pack
+            SELECT SINGLE WAERS
+            FROM ESLH
+            WHERE PACKNO = @<FS_ESLL>-SUB_PACKNO
+            INTO @<FS_ESLL>-WAERS_LL.
+
+            MOVE-CORRESPONDING <FS_ESLL> TO <FS_DATOS>.
+
+            APPEND <FS_DATOS> TO GT_DATOS.
+        ENDLOOP.
+
+    ELSE.
+*        MODIFY GT_DATOS FROM <FS_DATOS>.
+    ENDIF.
+
+  ENDLOOP.
+
+  ENDIF.
+
+ENDFORM.
+
+
+
+FORM DIS_REPO.
+
+  IF P_BW EQ 'X'.
+
+*  ZBVTB_SRV01_BW01
+* borrar y llenar la tabla para extractor BW Servicios
+* TABLA: ZBVTB_SRV01_BW01
+* Estructura: ZBIW_SRV01_BW01
+  DELETE FROM ZBVTB_SRV02_BW01.
+  COMMIT WORK.
+  INSERT ZBVTB_SRV02_BW01 FROM TABLE GT_DATOS.
+  COMMIT WORK.
+
+  ELSE.
+
+    DATA: LT_FCAT TYPE LVC_T_FCAT,
+          LS_LAYO TYPE LVC_S_LAYO,
+          LS_FCAT TYPE LVC_S_FCAT.
+
+* Catalogo
+
+*   EBELN
+    CLEAR LS_FCAT.
+    LS_FCAT-FIELDNAME = 'EBELN'.
+    LS_FCAT-REPTEXT   = 'Contrato'.
+    LS_FCAT-COLTEXT   = 'Contrato'.
+    LS_FCAT-SELTEXT   = 'Contrato'.
+    LS_FCAT-KEY       = ABAP_TRUE.
+    APPEND LS_FCAT TO LT_FCAT.
+
+
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'EBELP'.
+  LS_FCAT-REPTEXT   = 'Pos.Cont.'.
+  LS_FCAT-COLTEXT   = 'Pos.Cont.'.
+  LS_FCAT-SELTEXT   = 'Pos.Cont.'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+
+*EXTROW
+  "     EXTROW  TYPE ESLL-EXTROW,
+    CLEAR LS_FCAT.
+    LS_FCAT-FIELDNAME = 'EXTROW'.
+    LS_FCAT-REPTEXT   = 'Nro de Línea'.
+    LS_FCAT-COLTEXT   = 'Nro de Línea'.
+    LS_FCAT-SELTEXT   = 'Nro de Línea'.
+    LS_FCAT-KEY       = ABAP_TRUE.
+    APPEND LS_FCAT TO LT_FCAT.
+
+"         LOEKZ TYPE EKKO-LOEKZ,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'LOEKZ_C'.
+  LS_FCAT-REPTEXT   = 'Ind borrado Cab.'.
+  LS_FCAT-COLTEXT   = 'Ind borrado Cab.'.
+  LS_FCAT-SELTEXT   = 'Ind borrado Cab.'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+
+  " BUKRS TYPE EKKO-BUKRS,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'BUKRS'.
+  LS_FCAT-REPTEXT   = 'Sociedad'.
+  LS_FCAT-COLTEXT   = 'Sociedad'.
+  LS_FCAT-SELTEXT   = 'Sociedad'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"         BSART TYPE EKKO-BSART,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'BSART'.
+  LS_FCAT-REPTEXT   = 'Tipo Doc.'.
+  LS_FCAT-COLTEXT   = 'Tipo Doc.'.
+  LS_FCAT-SELTEXT   = 'Tipo Doc.'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"         BEDAT TYPE EKKO-BEDAT,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'BEDAT'.
+  LS_FCAT-REPTEXT   = 'Fecha Doc.'.
+  LS_FCAT-COLTEXT   = 'Fecha Doc.'.
+  LS_FCAT-SELTEXT   = 'Fecha Doc.'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"         AEDAT TYPE EKKO-AEDAT,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'AEDAT'.
+  LS_FCAT-REPTEXT   = 'Fecha Crea.OC'.
+  LS_FCAT-COLTEXT   = 'Fecha Crea.OC'.
+  LS_FCAT-SELTEXT   = 'Fecha Crea.OC'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"         EKGRP TYPE EKKO-EKGRP,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'EKGRP'.
+  LS_FCAT-REPTEXT   = 'Grupo de compras'.
+  LS_FCAT-COLTEXT   = 'Grupo de compras'.
+  LS_FCAT-SELTEXT   = 'Grupo de compras'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"         EKORG TYPE EKKO-EKORG,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'EKORG'.
+  LS_FCAT-REPTEXT   = 'Org. de Compras'.
+  LS_FCAT-COLTEXT   = 'Organiz. de Compras'.
+  LS_FCAT-SELTEXT   = 'Organiz. de Compras'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+
+"         LIFNR TYPE EKKO-LIFNR,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'LIFNR'.
+  LS_FCAT-REPTEXT   = 'Proveedor'.
+  LS_FCAT-COLTEXT   = 'Proveedor'.
+  LS_FCAT-SELTEXT   = 'Proveedor'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+*         KDATB TYPE EKKO-KDATB,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'KDATB'.
+  LS_FCAT-REPTEXT   = 'Válido Ini.'.
+  LS_FCAT-COLTEXT   = 'Válido Ini.'.
+  LS_FCAT-SELTEXT   = 'Válido Ini.'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"         KDATE TYPE EKKO-KDATE,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'KDATE'.
+  LS_FCAT-REPTEXT   = 'Válido Fin'.
+  LS_FCAT-COLTEXT   = 'Válido Fin'.
+  LS_FCAT-SELTEXT   = 'Válido Fin'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"         KTWRT TYPE EKKO-KTWRT,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'KTWRT'.
+  LS_FCAT-REPTEXT   = 'Valor previsto'.
+  LS_FCAT-COLTEXT   = 'Valor previsto'.
+  LS_FCAT-SELTEXT   = 'Valor previsto'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"         KTWRT_ML TYPE EKKO-KTWRT,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'KTWRT_ML'.
+  LS_FCAT-REPTEXT   = 'Valor previsto ML'.
+  LS_FCAT-COLTEXT   = 'Valor previsto ML'.
+  LS_FCAT-SELTEXT   = 'Valor previsto ML'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"         WAERS_CON TYPE EKKO-WAERS,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'WAERS_CON'.
+  LS_FCAT-REPTEXT   = 'Mon.Contrato'.
+  LS_FCAT-COLTEXT   = 'Mon.Contrato'.
+  LS_FCAT-SELTEXT   = 'Mon.Contrato'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+" WKURS_CON
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'WKURS_CON'.
+  LS_FCAT-REPTEXT   = 'TC Contrato'.
+  LS_FCAT-COLTEXT   = 'TC Contrato'.
+  LS_FCAT-SELTEXT   = 'TC Contrato'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"         UNSEZ TYPE EKKO-UNSEZ,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'UNSEZ'.
+  LS_FCAT-REPTEXT   = 'Nuestra Ref.'.
+  LS_FCAT-COLTEXT   = 'Nuestra Ref.'.
+  LS_FCAT-SELTEXT   = 'Nuestra Ref.'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+
+"        LOEKZ_P TYPE EKPO-LOEKZ,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'LOEKZ_P'.
+  LS_FCAT-REPTEXT   = 'Ind. Borrado Pos'.
+  LS_FCAT-COLTEXT   = 'Ind. Borrado Pos'.
+  LS_FCAT-SELTEXT   = 'Ind. Borrado Pos'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"        PSTYP TYPE EKPO-PSTYP,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'PSTYP'.
+  LS_FCAT-REPTEXT   = 'Tipo de posicion'.
+  LS_FCAT-COLTEXT   = 'Tipo de posicion'.
+  LS_FCAT-SELTEXT   = 'Tipo de posicion'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"        KNTTP TYPE EKPO-KNTTP,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'KNTTP'.
+  LS_FCAT-REPTEXT   = 'Tipo imputacion'.
+  LS_FCAT-COLTEXT   = 'Tipo imputacion'.
+  LS_FCAT-SELTEXT   = 'Tipo imputacion'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"        UMDAT TYPE EKPO-AEDAT,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'UMDAT'.
+  LS_FCAT-REPTEXT   = 'F.Ult Mod'.
+  LS_FCAT-COLTEXT   = 'F.Ult Mod'.
+  LS_FCAT-SELTEXT   = 'F.Ult Mod'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+*        TXZ01 TYPE EKPO-TXZ01
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'TXZ01'.
+  LS_FCAT-REPTEXT   = 'Texto breve pedido'.
+  LS_FCAT-COLTEXT   = 'Texto breve pedido'.
+  LS_FCAT-SELTEXT   = 'Texto breve pedido'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"        KTMNG TYPE EKPO-KTMNG,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'KTMNG'.
+  LS_FCAT-REPTEXT   = 'Cant. Prevista'.
+  LS_FCAT-COLTEXT   = 'Cant. Prevista'.
+  LS_FCAT-SELTEXT   = 'Cant. Prevista'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"        MEINS TYPE EKPO-MEINS,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'MEINS_CON'.
+  LS_FCAT-REPTEXT   = 'UM Contrato'.
+  LS_FCAT-COLTEXT   = 'UM Contrato'.
+  LS_FCAT-SELTEXT   = 'UM Contrato'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+
+"        NETPR TYPE EKPO-NETPR,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'NETPR'.
+  LS_FCAT-REPTEXT   = 'Precio neto'.
+  LS_FCAT-COLTEXT   = 'Precio neto'.
+  LS_FCAT-SELTEXT   = 'Precio neto'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+
+"        PEINH TYPE EKPO-PEINH,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'PEINH'.
+  LS_FCAT-REPTEXT   = 'por (Cant.Base)'.
+  LS_FCAT-COLTEXT   = 'por (Cant.Base)'.
+  LS_FCAT-SELTEXT   = 'por (Cant.Base)'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+
+"        BPRME TYPE EKPO-BPRME,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'BPRME'.
+  LS_FCAT-REPTEXT   = 'Unid.Cant.Prec.'.
+  LS_FCAT-COLTEXT   = 'Unid.Cant.Prec.'.
+  LS_FCAT-SELTEXT   = 'Unid.Cant.Prec.'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+
+"        MATKL TYPE EKPO-MATKL,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'MATKL'.
+  LS_FCAT-REPTEXT   = 'Grp Articulo'.
+  LS_FCAT-COLTEXT   = 'Grp Articulo'.
+  LS_FCAT-SELTEXT   = 'Grp Articulo'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"   WERKS TYPE EKPO-WERKS,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'WERKS'.
+  LS_FCAT-REPTEXT   = 'Centro'.
+  LS_FCAT-COLTEXT   = 'Centro'.
+  LS_FCAT-SELTEXT   = 'Centro'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+    " PACKNO TYPE EKPO-PACKNO,
+      CLEAR LS_FCAT.
+      LS_FCAT-FIELDNAME = 'PACKNO'.
+      LS_FCAT-REPTEXT   = 'Paquete'.
+      LS_FCAT-COLTEXT   = 'Paquete'.
+      LS_FCAT-SELTEXT   = 'Paquete'.
+      LS_FCAT-KEY       = ABAP_TRUE.
+      APPEND LS_FCAT TO LT_FCAT.
+
+    " SUB_PACKNO
+      CLEAR LS_FCAT.
+      LS_FCAT-FIELDNAME = 'SUB_PACKNO'.
+      LS_FCAT-REPTEXT   = 'Sub Paquete'.
+      LS_FCAT-COLTEXT   = 'Sub Paquete'.
+      LS_FCAT-SELTEXT   = 'Sub Paquete'.
+      LS_FCAT-KEY       = ABAP_TRUE.
+      APPEND LS_FCAT TO LT_FCAT.
+
+"      INTROW  TYPE ESLL-INTROW,
+      CLEAR LS_FCAT.
+      LS_FCAT-FIELDNAME = 'INTROW'.
+      LS_FCAT-REPTEXT   = 'Núm de línea'.
+      LS_FCAT-COLTEXT   = 'Núm de línea'.
+      LS_FCAT-SELTEXT   = 'Núm de línea'.
+      LS_FCAT-KEY       = ABAP_TRUE.
+      APPEND LS_FCAT TO LT_FCAT.
+
+
+* Catalogo Lineas de Servicio del Contrato
+
+"      SRVPOS  TYPE ESLL-SRVPOS,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'SRVPOS'.
+  LS_FCAT-REPTEXT   = 'Servicio'.
+  LS_FCAT-COLTEXT   = 'Servicio'.
+  LS_FCAT-SELTEXT   = 'Servicio'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"  KTEXT1  TYPE ESLL-KTEXT1.
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'KTEXT1'.
+  LS_FCAT-REPTEXT   = 'Texto breve'.
+  LS_FCAT-COLTEXT   = 'Texto breve'.
+  LS_FCAT-SELTEXT   = 'Texto breve'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"      TXT_AMPL(250) TYPE C,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'TXT_AMPL'.
+  LS_FCAT-REPTEXT   = 'Texto ampliado'.
+  LS_FCAT-COLTEXT   = 'Texto ampliado'.
+  LS_FCAT-SELTEXT   = 'Texto ampliado'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"      ERNAM   TYPE EKKO-ERNAM.
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'ERNAM'.
+  LS_FCAT-REPTEXT   = 'Creado por'.
+  LS_FCAT-COLTEXT   = 'Creado por'.
+  LS_FCAT-SELTEXT   = 'Creado por'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"      MENGE_LL   TYPE ESLL-MENGE,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'MENGE_LL'.
+  LS_FCAT-REPTEXT   = 'Cant.LS'.
+  LS_FCAT-COLTEXT   = 'Cant.LS'.
+  LS_FCAT-SELTEXT   = 'Cant.LS'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"      MEINS_LL   TYPE ESLL-MEINS,
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'MEINS_LL'.
+  LS_FCAT-REPTEXT   = 'UM LS'.
+  LS_FCAT-COLTEXT   = 'UM LS'.
+  LS_FCAT-SELTEXT   = 'UM LS'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"      TBTWR   TYPE ESLL-TBTWR.
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'TBTWR'.
+  LS_FCAT-REPTEXT   = 'Precio bruto'.
+  LS_FCAT-COLTEXT   = 'Precio bruto'.
+  LS_FCAT-SELTEXT   = 'Precio bruto'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"      ERNAM   TYPE EKKO-ERNAM.
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'ERNAM'.
+  LS_FCAT-REPTEXT   = 'Creado por'.
+  LS_FCAT-COLTEXT   = 'Creado por'.
+  LS_FCAT-SELTEXT   = 'Creado por'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"      NAME_FIRST
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'NAME_FIRST'.
+  LS_FCAT-REPTEXT   = 'Creado por: Nombre'.
+  LS_FCAT-COLTEXT   = 'Creado por: Nombre'.
+  LS_FCAT-SELTEXT   = 'Creado por: Nombre'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+"      NAME_FIRST
+  CLEAR LS_FCAT.
+  LS_FCAT-FIELDNAME = 'NAME_LAST'.
+  LS_FCAT-REPTEXT   = 'Creado por: Apellido'.
+  LS_FCAT-COLTEXT   = 'Creado por: Apellido'.
+  LS_FCAT-SELTEXT   = 'Creado por: Apellido'.
+  LS_FCAT-KEY       = ABAP_TRUE.
+  APPEND LS_FCAT TO LT_FCAT.
+
+* Layout
+  LS_LAYO-ZEBRA = ABAP_TRUE.
+  LS_LAYO-COL_OPT = ABAP_TRUE.
+  LS_LAYO-CWIDTH_OPT = ABAP_TRUE.
+
+* Mostrar ALV
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY_LVC'
+    EXPORTING
+      I_CALLBACK_PROGRAM = SY-REPID
+      I_GRID_TITLE       = 'Lista de Servicios'
+      IS_LAYOUT_LVC      = LS_LAYO
+      IT_FIELDCAT_LVC    = LT_FCAT
+    TABLES
+      T_OUTTAB           = GT_DATOS.
+ENDIF.
+
+ENDFORM.
+*------------------------------------------------------------------------------------*
